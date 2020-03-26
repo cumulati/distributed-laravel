@@ -63,7 +63,7 @@ class RouteServiceProvider extends ServiceProvider
 
         $protectionMiddleware = $config['protection_middleware'];
 
-        $highLevelParts = array_map(function ($namespace) {
+        $highLevelParts = array_map(function ($namespace) use ($protectionMiddleware) {
             if (! is_array($namespace)) {
                 $namespace = [
                     'path' => $namespace,
@@ -82,6 +82,7 @@ class RouteServiceProvider extends ServiceProvider
             return [
                 'components' => glob(sprintf('%s%s*', $namespace['path'], DIRECTORY_SEPARATOR), GLOB_ONLYDIR),
                 'route'      => $namespace['route'],
+                'protection_middleware' => $namespace['protection_middleware'] ?? $protectionMiddleware,
             ];
         }, $config['namespaces']);
 
@@ -110,7 +111,7 @@ class RouteServiceProvider extends ServiceProvider
 
                     $middleware = $part['route']['middleware'];
                     if ($protected) {
-                        $middleware = array_merge($protectionMiddleware, $middleware);
+                        $middleware = array_merge($part['protection_middleware'], $middleware);
                     }
 
                     $group = array_merge($part['route'], [
